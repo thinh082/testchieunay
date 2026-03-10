@@ -1,0 +1,802 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Danh sách cử tri</title>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --orange: #f05a1a;
+      --orange-light: #fff0ea;
+      --orange-mid: #ffdece;
+      --green: #1db954;
+      --green-light: #e6f9ee;
+      --gray-bg: #f4f6fb;
+      --gray-border: #e5e9f2;
+      --gray-text: #9aa3b5;
+      --dark: #1a2240;
+      --card-shadow: 0 2px 12px rgba(30, 40, 80, 0.07);
+    }
+
+    body {
+      font-family: "Be Vietnam Pro", sans-serif;
+      background: var(--gray-bg);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 20px 12px 40px;
+    }
+
+    .phone-frame {
+      width: 100%;
+      max-width: 420px;
+      background: #fff;
+      border-radius: 28px;
+      box-shadow: 0 8px 40px rgba(30, 40, 80, 0.13);
+      overflow: hidden;
+      min-height: 90vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      align-items: center;
+      padding: 22px 20px 16px;
+      background: #fff;
+      border-bottom: 1.5px solid var(--gray-border);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .btn-back {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px 8px 4px 0;
+      display: flex;
+      align-items: center;
+      color: var(--dark);
+      font-size: 20px;
+      transition: opacity 0.15s;
+    }
+
+    .btn-back:hover {
+      opacity: 0.6;
+    }
+
+    .header h1 {
+      flex: 1;
+      text-align: center;
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--dark);
+      letter-spacing: 0.3px;
+      margin-right: 32px;
+    }
+
+    /* Search area */
+    .search-area {
+      padding: 18px 16px 10px;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-wrap .icon {
+      position: absolute;
+      left: 14px;
+      color: var(--orange);
+      font-size: 17px;
+      pointer-events: none;
+    }
+
+    .input-wrap input {
+      width: 100%;
+      padding: 13px 14px 13px 42px;
+      border: 1.5px solid var(--gray-border);
+      border-radius: 14px;
+      font-family: "Be Vietnam Pro", sans-serif;
+      font-size: 14px;
+      color: var(--dark);
+      background: #fff;
+      outline: none;
+      transition:
+        border-color 0.2s,
+        box-shadow 0.2s;
+    }
+
+    .input-wrap input:focus {
+      border-color: var(--orange);
+      box-shadow: 0 0 0 3px rgba(240, 90, 26, 0.1);
+    }
+
+    .input-wrap input::placeholder {
+      color: var(--gray-text);
+    }
+
+    .btn-search {
+      width: 100%;
+      padding: 14px;
+      background: var(--orange);
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      font-family: "Be Vietnam Pro", sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      letter-spacing: 0.3px;
+      transition:
+        background 0.15s,
+        transform 0.1s,
+        box-shadow 0.15s;
+      box-shadow: 0 4px 16px rgba(240, 90, 26, 0.28);
+    }
+
+    .btn-search:hover {
+      background: #d44b10;
+    }
+
+    .btn-search:active {
+      transform: scale(0.98);
+    }
+
+    /* Stats bar */
+    .stats-bar {
+      padding: 10px 16px 2px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .stats-label {
+      font-size: 13px;
+      color: var(--gray-text);
+    }
+
+    .stats-count {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--orange);
+    }
+
+    .stats-voted {
+      margin-left: auto;
+      font-size: 12px;
+      color: var(--green);
+      font-weight: 600;
+      background: var(--green-light);
+      border-radius: 20px;
+      padding: 3px 10px;
+    }
+
+    /* List */
+    .voter-list {
+      flex: 1;
+      padding: 8px 12px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow-y: auto;
+    }
+
+    .voter-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: #fff;
+      border-radius: 16px;
+      padding: 14px 14px;
+      border: 1.5px solid var(--gray-border);
+      box-shadow: var(--card-shadow);
+      cursor: pointer;
+      transition:
+        border-color 0.18s,
+        box-shadow 0.18s,
+        transform 0.12s;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    .voter-card:hover {
+      border-color: var(--orange);
+      box-shadow: 0 4px 18px rgba(240, 90, 26, 0.12);
+      transform: translateY(-1px);
+    }
+
+    .voter-card:active {
+      transform: scale(0.985);
+    }
+
+    .voter-card.voted {
+      border-color: rgba(29, 185, 84, 0.25);
+    }
+
+    .avatar {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: var(--orange-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.18s;
+    }
+
+    .voter-card.voted .avatar {
+      background: var(--green-light);
+    }
+
+    .avatar svg {
+      width: 26px;
+      height: 26px;
+    }
+
+    .avatar svg path {
+      fill: var(--orange);
+    }
+
+    .voter-card.voted .avatar svg path {
+      fill: var(--green);
+    }
+
+    .info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .name {
+      font-size: 14.5px;
+      font-weight: 700;
+      color: var(--dark);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 3px;
+    }
+
+    .address {
+      font-size: 12.5px;
+      color: var(--gray-text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .badge {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 20px;
+      padding: 5px 11px;
+      letter-spacing: 0.1px;
+    }
+
+    .badge.voted-badge {
+      background: var(--green-light);
+      color: var(--green);
+      border: 1px solid rgba(29, 185, 84, 0.2);
+    }
+
+    .badge.not-voted {
+      background: var(--gray-bg);
+      color: var(--gray-text);
+      border: 1px solid var(--gray-border);
+    }
+
+    .badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+      display: inline-block;
+    }
+
+    /* Empty state */
+    .empty-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 40px 20px;
+      color: var(--gray-text);
+    }
+
+    .empty-state svg {
+      opacity: 0.35;
+    }
+
+    .empty-state p {
+      font-size: 14px;
+      text-align: center;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(20, 30, 60, 0.45);
+      z-index: 100;
+      align-items: flex-end;
+      justify-content: center;
+      backdrop-filter: blur(3px);
+      animation: fadeIn 0.18s ease;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(60px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .modal {
+      background: #fff;
+      border-radius: 24px 24px 0 0;
+      padding: 28px 24px 36px;
+      width: 100%;
+      max-width: 420px;
+      animation: slideUp 0.22s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+
+    .modal-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: var(--orange-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+    }
+
+    .modal-icon svg {
+      width: 30px;
+      height: 30px;
+    }
+
+    .modal h2 {
+      text-align: center;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 8px;
+    }
+
+    .modal .voter-highlight {
+      text-align: center;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--orange);
+      margin-bottom: 6px;
+    }
+
+    .modal .voter-address {
+      text-align: center;
+      font-size: 13px;
+      color: var(--gray-text);
+      margin-bottom: 24px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-cancel,
+    .btn-confirm {
+      flex: 1;
+      padding: 14px;
+      border-radius: 14px;
+      font-family: "Be Vietnam Pro", sans-serif;
+      font-size: 14.5px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: 0.15s;
+    }
+
+    .btn-cancel {
+      background: var(--gray-bg);
+      color: var(--gray-text);
+      border: 1.5px solid var(--gray-border);
+    }
+
+    .btn-cancel:hover {
+      background: #eaeef5;
+    }
+
+    .btn-confirm {
+      background: var(--orange);
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(240, 90, 26, 0.28);
+    }
+
+    .btn-confirm:hover {
+      background: #d44b10;
+    }
+
+    .btn-confirm:active {
+      transform: scale(0.98);
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      top: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-80px);
+      background: var(--dark);
+      color: #fff;
+      font-family: "Be Vietnam Pro", sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 13px 22px;
+      border-radius: 40px;
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+      transition:
+        transform 0.32s cubic-bezier(0.23, 1, 0.32, 1),
+        opacity 0.32s;
+      opacity: 0;
+      white-space: nowrap;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .toast-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--green);
+    }
+
+    @media (max-width: 440px) {
+      body {
+        padding: 0;
+      }
+
+      .phone-frame {
+        border-radius: 0;
+        min-height: 100vh;
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="phone-frame">
+    <!-- Header -->
+    <div class="header">
+      <button class="btn-back" onclick="history.back()" aria-label="Quay lại">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+          <path d="M15 18l-6-6 6-6" stroke="#1A2240" stroke-width="2.2" stroke-linecap="round"
+            stroke-linejoin="round" />
+        </svg>
+      </button>
+      <h1>Danh sách cử tri</h1>
+    </div>
+
+    <!-- Search -->
+    <div class="search-area">
+      <div class="input-wrap">
+        <span class="icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <circle cx="11" cy="11" r="8" stroke="#F05A1A" stroke-width="2" />
+            <path d="M21 21l-4.35-4.35" stroke="#F05A1A" stroke-width="2" stroke-linecap="round" />
+          </svg>
+        </span>
+        <input type="text" id="searchName" placeholder="Nhập họ tên" oninput="onSearch()" />
+      </div>
+      <div class="input-wrap">
+        <span class="icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path
+              d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z"
+              fill="#F05A1A" />
+          </svg>
+        </span>
+        <input type="text" id="searchAddress" placeholder="Nhập địa chỉ" oninput="onSearch()" />
+      </div>
+      <button class="btn-search" onclick="onSearch()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <circle cx="11" cy="11" r="8" stroke="#fff" stroke-width="2.2" />
+          <path d="M21 21l-4.35-4.35" stroke="#fff" stroke-width="2.2" stroke-linecap="round" />
+        </svg>
+        Tìm kiếm
+      </button>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-bar">
+      <span class="stats-label">Kết quả:</span>
+      <span class="stats-count" id="totalCount">0</span>
+      <span class="stats-label">người</span>
+      <span class="stats-voted" id="votedCount">✓ 0 đã bầu</span>
+    </div>
+
+    <!-- List -->
+    <div class="voter-list" id="voterList"></div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-icon">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path
+            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+            stroke="#F05A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </div>
+      <h2>Xác nhận bầu cử</h2>
+      <div class="voter-highlight" id="modalName"></div>
+      <div class="voter-address" id="modalAddress"></div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeModal()">Huỷ</button>
+        <button class="btn-confirm" onclick="confirmVote()">
+          ✓ Xác nhận
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast">
+    <span class="toast-dot"></span>
+    <span id="toastMsg">Đã cập nhật thành công!</span>
+  </div>
+
+  <script>
+    // ─── FAKE DATA (theo cấu trúc SQL) ───────────────────────────────────────────
+    // Chỉ giữ lại những cử tri CHƯA bầu (dabau: false)
+    let voters = [
+      {
+        id: 2,
+        hoten: "Trần Thị Bình",
+        gioitinh: "Nữ",
+        namsinh: 1990,
+        noithuongtru: "456 Đường Nguyễn Huệ, Quận 1, TP.HCM",
+        noitamtru: null,
+        ghichu: null,
+        dabau: false,
+      },
+      {
+        id: 4,
+        hoten: "Phạm Minh Đức",
+        gioitinh: "Nam",
+        namsinh: 1995,
+        noithuongtru: "12 Đường Nam Kỳ Khởi Nghĩa, Quận 3, TP.HCM",
+        noitamtru: null,
+        ghichu: null,
+        dabau: false,
+      },
+      {
+        id: 6,
+        hoten: "Hoàng Văn Hải",
+        gioitinh: "Nam",
+        namsinh: 1983,
+        noithuongtru: "55 Đường Pasteur, Quận 1, TP.HCM",
+        noitamtru: null,
+        ghichu: null,
+        dabau: false,
+      },
+      {
+        id: 8,
+        hoten: "Ngô Quang Minh",
+        gioitinh: "Nam",
+        namsinh: 1975,
+        noithuongtru: "88 Đường Trần Hưng Đạo, Quận 5, TP.HCM",
+        noitamtru: null,
+        ghichu: null,
+        dabau: false,
+      },
+      {
+        id: 9,
+        hoten: "Bùi Thị Ngọc",
+        gioitinh: "Nữ",
+        namsinh: 1998,
+        noithuongtru: "47 Đường Lý Tự Trọng, Quận 1, TP.HCM",
+        noitamtru: null,
+        ghichu: null,
+        dabau: false,
+      },
+      {
+        id: 11,
+        hoten: "Lý Hồng Phúc",
+        gioitinh: "Nam",
+        namsinh: 1987,
+        noithuongtru: "300 Đường Võ Văn Kiệt, Quận 5, TP.HCM",
+        noitamtru: null,
+        ghichu: null,
+        dabau: false,
+      },
+    ];
+
+    let filtered = [...voters];
+    let selectedId = null;
+
+    // ─── RENDER ──────────────────────────────────────────────────────────────────
+    function getAddress(v) {
+      return v.noithuongtru || v.noitamtru || "Không có địa chỉ";
+    }
+
+    function renderList(data) {
+      const list = document.getElementById("voterList");
+      const total = document.getElementById("totalCount");
+      const votedEl = document.getElementById("votedCount");
+
+      total.textContent = data.length;
+      votedEl.textContent = `⏳ ${data.length} chưa bầu`;
+
+      if (data.length === 0) {
+        list.innerHTML = `
+      <div class="empty-state">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="8" stroke="#9AA3B5" stroke-width="1.5"/><path d="M21 21l-4.35-4.35" stroke="#9AA3B5" stroke-width="1.5" stroke-linecap="round"/><path d="M8 11h6M11 8v6" stroke="#9AA3B5" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <p>Không tìm thấy cử tri<br>phù hợp với từ khoá.</p>
+      </div>`;
+        return;
+      }
+
+      list.innerHTML = data
+        .map(
+          (v) => `
+    <div class="voter-card ${v.dabau ? "voted" : ""}" onclick="openModal(${v.id})">
+      <div class="avatar">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" fill="${v.dabau ? "#1DB954" : "#F05A1A"}"/>
+        </svg>
+      </div>
+      <div class="info">
+        <div class="name">${v.hoten}</div>
+        <div class="address">${getAddress(v)}</div>
+      </div>
+      <div class="badge ${v.dabau ? "voted-badge" : "not-voted"}">
+        ${v.dabau ? '<span class="badge-dot"></span> Đã bầu cử' : "Chưa bầu"}
+      </div>
+    </div>
+  `,
+        )
+        .join("");
+    }
+
+    // ─── SEARCH ──────────────────────────────────────────────────────────────────
+    function onSearch() {
+      const name = document
+        .getElementById("searchName")
+        .value.trim()
+        .toLowerCase();
+      const addr = document
+        .getElementById("searchAddress")
+        .value.trim()
+        .toLowerCase();
+
+      filtered = voters.filter((v) => {
+        const matchName =
+          !name || (v.hoten || "").toLowerCase().includes(name);
+        const matchAddr =
+          !addr ||
+          (v.noithuongtru || "").toLowerCase().includes(addr) ||
+          (v.noitamtru || "").toLowerCase().includes(addr);
+        return matchName && matchAddr;
+      });
+
+      renderList(filtered);
+    }
+
+    // ─── MODAL ───────────────────────────────────────────────────────────────────
+    function openModal(id) {
+      const v = voters.find((x) => x.id === id);
+      if (!v) return;
+
+      selectedId = id;
+      document.getElementById("modalName").textContent = v.hoten;
+      document.getElementById("modalAddress").textContent = getAddress(v);
+      document.getElementById("modalOverlay").classList.add("active");
+    }
+
+    function closeModal() {
+      document.getElementById("modalOverlay").classList.remove("active");
+      selectedId = null;
+    }
+
+    function confirmVote() {
+      if (selectedId === null) return;
+      const v = voters.find((x) => x.id === selectedId);
+      const name = v ? v.hoten : "";
+
+      // Xóa khỏi mảng voters và filtered
+      voters = voters.filter((x) => x.id !== selectedId);
+      filtered = filtered.filter((x) => x.id !== selectedId);
+
+      // TODO: replace with actual API call → PUT /api/voters/{id}/vote
+      // fetch(`/api/voters/${selectedId}/vote`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ dabau: true }) })
+
+      closeModal();
+      renderList(filtered);
+      showToast(`${name} đã xác nhận bầu cử!`);
+    }
+
+    // Close modal on overlay click
+    document
+      .getElementById("modalOverlay")
+      .addEventListener("click", function (e) {
+        if (e.target === this) closeModal();
+      });
+
+    // ─── TOAST ───────────────────────────────────────────────────────────────────
+    let toastTimer;
+    function showToast(msg) {
+      const toast = document.getElementById("toast");
+      document.getElementById("toastMsg").textContent = msg;
+      toast.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove("show"), 2800);
+    }
+
+    // ─── INIT ────────────────────────────────────────────────────────────────────
+    renderList(voters);
+    filtered = [...voters];
+  </script>
+</body>
+
+</html>
